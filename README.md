@@ -1,4 +1,4 @@
-# 🚁 Autonomous Drone Landing on a Moving Vehicle
+#  Autonomous Drone Landing on a Moving Vehicle
 ### PX4 · Gazebo Classic · ROS2 Humble · OpenCV ArUco · Python Offboard Control
 
 [![ROS2 Humble](https://img.shields.io/badge/ROS2-Humble-blue?logo=ros&logoColor=white)](https://docs.ros.org/en/humble/)
@@ -57,7 +57,7 @@ This simulation tackles both using a pipeline built entirely on **open-source to
 
 ---
 
-## 🧠 System Architecture
+##  System Architecture
 
 The full pipeline flows from the Gazebo camera to PX4 motor commands:
 <img width="1360" height="1940" alt="image" src="https://github.com/user-attachments/assets/bba24f1a-bd72-4591-a7f1-82d5b13922a5" />
@@ -197,7 +197,7 @@ The drone will arm, take off, detect the marker, and autonomously land on the mo
 
 ---
 
-## 🔑 Key Technical Concepts
+##  Key Technical Concepts
 
 ### ArUco Pose Estimation
 ArUco markers are square fiducial markers with a unique binary pattern. OpenCV's `estimatePoseSingleMarkers()` uses the known physical size of the marker and the camera intrinsic matrix to solve a PnP (Perspective-n-Point) problem — determining the 3D rigid body transform between the camera and the marker. The result is a translation vector giving the marker's position in the camera frame.
@@ -216,20 +216,13 @@ Rather than descending at a fixed rate, the controller adjusts descent speed bas
 
 ---
 
-## 🎬 How to Add Your Demo Video
-
-GitHub does not host video files. The recommended approach:
-
-### Option A — YouTube (recommended for README)
-1. Record your simulation using `obs-studio` or `kazam`: `sudo apt install obs-studio`
-2. Upload to YouTube
-3. Add to README:
-```markdown
-[![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
-```
-The thumbnail becomes a clickable image that opens YouTube.
-
----
+## 🎬 Demo Video
+The demo is already embedded at the top of this README as a clickable YouTube thumbnail.
+Direct link: https://youtu.be/U6qtfy8A2m4
+The video shows the full sequence: drone arms and takes off → ArUco marker detected on moving vehicle → alignment → adaptive descent → blind landing → "LANDED ON MARKER" confirmation banner.
+How the YouTube embed works on GitHub
+GitHub README files cannot play video inline, but they can display a clickable image. The embed uses YouTube's auto-generated thumbnail URL:
+markdown[![Alt text](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
 
 ## 📊 Performance Metrics (Simulation)
 
@@ -248,19 +241,13 @@ The thumbnail becomes a clickable image that opens YouTube.
 
 ---
 
-## 📄 License
+##  License
 
 This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
-MIT is the right choice here because:
-- It allows anyone to use, modify, and build on your work
-- It's compatible with PX4, ROS2, and OpenCV (all permissive licenses)
-- It's the most widely recognised open-source license, ideal for portfolio and research visibility
-- It requires only attribution — anyone who uses your code must credit you
-
 ---
 
-## 🤝 Acknowledgements
+##  Acknowledgements
 
 - [PX4 Autopilot](https://px4.io/) — open-source flight stack
 - [ROS2 Humble](https://docs.ros.org/en/humble/) — robotics middleware
@@ -269,10 +256,11 @@ MIT is the right choice here because:
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **RAGHAV ARORA**
 > B.Tech  in AI-ML
+> 
 > [LinkedIn](https://linkedin.com/in/raghav-arora18) · [Email](mailto:arora.arraghav@email.com)
 
 ---
