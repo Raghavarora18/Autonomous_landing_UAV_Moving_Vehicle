@@ -40,10 +40,8 @@ This simulation tackles both using a pipeline built entirely on **open-source to
 
 ## 🎬 Demo
 
-> **Add your demo video here.**
-
 <div align="center">
-<img src="docs/images/demo_screenshot.png" alt="Demo screenshot showing drone above moving vehicle" width="80%">
+  **Direct link - (https://youtu.be/U6qtfy8A2m4?si=bZ-eWMR-2FWqbAOp)**
 </div>
 
 **What the demo shows:**
@@ -154,7 +152,7 @@ source install/setup.bash
 
 ```bash
 cd ~/ros2_ws/src
-git clone https://github.com/YOUR_USERNAME/autonomous-drone-landing.git
+git clone https://github.com/Raghavarora18/Autonomous_landing_UAV_Moving_Vehicle.git
 cd ~/ros2_ws
 colcon build
 source install/setup.bash
@@ -215,14 +213,6 @@ Offboard mode allows an external computer to directly command the drone's positi
 Rather than descending at a fixed rate, the controller adjusts descent speed based on how well the drone is currently tracking the marker. Fast descent only when well-centred; full stop when the error grows too large. This prevents the drone from "falling past" the vehicle during a momentary tracking error.
 
 ---
-
-## 🎬 Demo Video
-The demo is already embedded at the top of this README as a clickable YouTube thumbnail.
-Direct link: https://youtu.be/U6qtfy8A2m4
-The video shows the full sequence: drone arms and takes off → ArUco marker detected on moving vehicle → alignment → adaptive descent → blind landing → "LANDED ON MARKER" confirmation banner.
-How the YouTube embed works on GitHub
-GitHub README files cannot play video inline, but they can display a clickable image. The embed uses YouTube's auto-generated thumbnail URL:
-markdown[![Alt text](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
 
 ## 📊 Performance Metrics (Simulation)
 
