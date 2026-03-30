@@ -10,7 +10,7 @@
 
 **An autonomous drone that detects, tracks, and lands on a moving vehicle in simulation — using vision-based ArUco marker detection, a Kalman filter for predictive tracking, PID + lead-compensation control, and a robust multi-phase landing state machine running on PX4 offboard mode.**
 
-[📹 Demo Video](#-demo) · [🧠 Architecture](#-system-architecture) · [⚙️ Setup](#️-setup-and-installation)
+[📹 Demo Video](#-demo) · [🧠 Architecture](#-System-Architecture) · [⚙️ Setup](#️-setup-and-installation)
 
 </div>
 
