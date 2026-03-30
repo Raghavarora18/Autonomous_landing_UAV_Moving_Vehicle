@@ -182,13 +182,13 @@ MicroXRCEAgent udp4 -p 8888
 **Terminal 3 — Start ArUco detection node:**
 ```bash
 source ~/ros2_ws/install/setup.bash
-ros2 run autonomous_drone_landing aruco_node
+ros2 run Autonomous_landing_UAV_Moving_Vehicle aruco_node
 ```
 
 **Terminal 4 — Start offboard landing controller:**
 ```bash
 source ~/ros2_ws/install/setup.bash
-ros2 run autonomous_drone_landing offboard_landing
+ros2 run Autonomous_landing_UAV_Moving_Vehicle offboard_landing
 ```
 
 The drone will arm, take off, detect the marker, and autonomously land on the moving vehicle.
