@@ -10,21 +10,21 @@ import cv2.aruco as aruco
 import numpy as np
 
 # CONFIGURATION
-FOV_RAD     = 1.3962634   # SDF <horizontal_fov> in radians (80° default)
+FOV_RAD     = 1.3962634   
 IMAGE_W     = 640
 IMAGE_H     = 480
-MARKER_SIZE = 1.0          # metres — must match SDF <size>
-EXPECTED_ID = 0            # set to None to auto-detect and print ID
+MARKER_SIZE = 1.0      
+EXPECTED_ID = 0            
 
 # Coasting: keep publishing Kalman prediction this many frames after loss
 MAX_COAST_FRAMES = 15
 
 # Landing confirmation thresholds
-LAND_CONFIRM_ALT_M  = 0.8   # tvec[2] below this = we are very close to marker
-LAND_CONFIRM_ERR_M  = 0.4   # horizontal error below this = we are centred
+LAND_CONFIRM_ALT_M  = 0.8   
+LAND_CONFIRM_ERR_M  = 0.4  
 
 # Speed display: smooth km/h reading with EMA
-SPEED_EMA_ALPHA = 0.3   # 0=frozen, 1=raw (0.3 = smooth but responsive)
+SPEED_EMA_ALPHA = 0.3 
 
 _fx = (IMAGE_W / 2.0) / math.tan(FOV_RAD / 2.0)
 _fy = _fx
@@ -32,12 +32,6 @@ _cx = IMAGE_W  / 2.0
 _cy = IMAGE_H  / 2.0
 
 class MarkerKalmanTracker:
-    """
-    4-state Kalman filter: [x, y, vx, vy] in camera-plane metres.
-    Q tuned for a moving vehicle: position noise moderate, velocity noise
-    high so the filter adapts quickly when the car changes direction.
-    """
-
     def __init__(self, x0: float, y0: float):
         self.H = np.array([[1,0,0,0],[0,1,0,0]], dtype=np.float64)
         self.Q = np.diag([0.05, 0.05, 1.0, 1.0]).astype(np.float64)
@@ -220,25 +214,6 @@ class ArucoNode(Node):
         cv2.waitKey(1)
 
     def _draw_overlay(self, frame, rx, ry, rz, det_pct, on_marker):
-        """
-        Draw detection info + speed + landing confirmation on the frame.
-
-        Speed interpretation:
-          The Kalman vx/vy are in camera-frame m/s — the rate of change
-          of the marker's position in the camera image (in metres, not pixels).
-          When the drone is stationary above the car, this equals the car's
-          ground speed projected onto the camera plane. During drone motion
-          it includes both. At low altitude and good alignment it is a
-          reliable proxy for vehicle speed.
-
-        Landing confirmation logic:
-          rz < LAND_CONFIRM_ALT_M (0.8m): drone is very close to marker plane.
-          horiz_err < LAND_CONFIRM_ERR_M (0.4m): drone is centred over marker.
-          Both true simultaneously = drone is on the car roof, on the marker.
-          This cannot be true if the drone is on the ground (marker not visible).
-          This cannot be true if the drone is on the car but off the marker
-          (horiz_err would be > 0.4m for a 1m × 1m marker).
-        """
         h = frame.shape[0]
 
         # Line 1: detection info
@@ -267,15 +242,7 @@ class ArucoNode(Node):
                 (6, 78), cv2.FONT_HERSHEY_SIMPLEX, 0.60, (0,165,255), 2)
           
     def _publish(self, xy, z, vel, coasting):
-        """
-        Encoding contract with offboard_landing.py:
-          position.x/y  = smoothed offset RIGHT/DOWN (m, camera frame)
-          position.z    = depth (m) — real altitude above marker
-          orientation.x = Kalman vx (m/s)
-          orientation.y = Kalman vy (m/s)
-          orientation.z = 0.0 real / 1.0 coasting
-          orientation.w = 1.0 sentinel
-        """
+
         msg = PoseStamped()
         msg.header.stamp    = self.get_clock().now().to_msg()
         msg.header.frame_id = 'camera'
