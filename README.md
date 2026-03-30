@@ -41,7 +41,7 @@ This simulation tackles both using a pipeline built entirely on **open-source to
 ## 🎬 Demo
 
 <div align="center">
-  **Direct link - (https://youtu.be/U6qtfy8A2m4?si=bZ-eWMR-2FWqbAOp)**
+  Direct link - (https://youtu.be/U6qtfy8A2m4?si=bZ-eWMR-2FWqbAOp)
 </div>
 
 **What the demo shows:**
