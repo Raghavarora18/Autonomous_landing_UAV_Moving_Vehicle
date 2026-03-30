@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="hatchback_red">
+    <static>false</static>
+    
+    <plugin name="circular_motion" filename="libcircular_motion_plugin.so"/>
+
+    <link name="car_body">
+      <collision name="collision">
+        <pose>0 0 0 0 0 1.57079632679</pose>
+        <geometry>
+          <mesh>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <uri>model://hatchback_red/meshes/hatchback.obj</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="car_visual">
+        <pose>0 0 0 0 0 1.57079632679</pose>
+        <geometry>
+          <mesh>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <uri>model://hatchback_red/meshes/hatchback.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="aruco_marker">
+        <pose>0 0 1.56 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.0 1.0 0.01</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://hatchback_red/materials/scripts</uri>
+            <uri>model://hatchback_red/materials/textures</uri>
+            <name>Gazebo/ArucoMarker</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
