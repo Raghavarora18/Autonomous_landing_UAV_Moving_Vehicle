@@ -1,9 +1,3 @@
-# Autonomous_landing_UAV_Moving_Vehicle
-This project demonstrates a vision-based autonomous UAV system that performs precision landing on a moving vehicle. The system integrates real-time image processing with control logic to track and land on a dynamic target. The project highlights concepts such as visual servoing, predictive control, state machine design.
-<div align="center">
-
-<img src="docs/images/banner.gif" alt="Drone landing on moving vehicle" width="100%">
-
 # 🚁 Autonomous Drone Landing on a Moving Vehicle
 ### PX4 · Gazebo Classic · ROS2 Humble · OpenCV ArUco · Python Offboard Control
 
@@ -14,9 +8,9 @@ This project demonstrates a vision-based autonomous UAV system that performs pre
 [![Gazebo Classic](https://img.shields.io/badge/Gazebo-Classic-orange)](http://gazebosim.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**A fully autonomous drone that detects, tracks, and lands on a moving vehicle in simulation — using vision-based ArUco marker detection, a Kalman filter for predictive tracking, PID + lead-compensation control, and a robust multi-phase landing state machine running on PX4 offboard mode.**
+**An autonomous drone that detects, tracks, and lands on a moving vehicle in simulation — using vision-based ArUco marker detection, a Kalman filter for predictive tracking, PID + lead-compensation control, and a robust multi-phase landing state machine running on PX4 offboard mode.**
 
-[📹 Demo Video](#-demo) · [🧠 Architecture](#-system-architecture) · [⚙️ Setup](#️-setup-and-installation) · [📦 Modules](#-module-breakdown) · [🔮 Future Work](#-future-improvements)
+[📹 Demo Video](#-demo) · [🧠 Architecture](#-system-architecture) · [⚙️ Setup](#️-setup-and-installation)
 
 </div>
 
@@ -46,7 +40,7 @@ This simulation tackles both using a pipeline built entirely on **open-source to
 
 ## 🎬 Demo
 
-> **Add your demo video here.** See the [How to Add Your Demo Video](#-how-to-add-your-demo-video) section below for exact instructions.
+> **Add your demo video here.**
 
 <div align="center">
 <img src="docs/images/demo_screenshot.png" alt="Demo screenshot showing drone above moving vehicle" width="80%">
@@ -66,173 +60,10 @@ This simulation tackles both using a pipeline built entirely on **open-source to
 ## 🧠 System Architecture
 
 The full pipeline flows from the Gazebo camera to PX4 motor commands:
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        GAZEBO CLASSIC SIMULATION                         │
-│                                                                           │
-│   ┌──────────────────┐      ┌──────────────────┐    ┌─────────────────┐ │
-│   │  Downward Camera │      │   Moving Vehicle  │    │  ArUco Marker   │ │
-│   │  640×480, 80°FOV │      │  r=2.5m ω=0.5r/s │    │  ID=0, 1m×1m   │ │
-│   └────────┬─────────┘      └──────────────────┘    └────────┬────────┘ │
-│            │ /drone/downward_camera/image_raw                  │ on roof  │
-└────────────┼─────────────────────────────────────────────────┼───────────┘
-             │                                                  │
-             ▼                                                  │
-┌────────────────────────────────┐                             │
-│         aruco_node.py          │◄────────────────────────────┘
-│                                │  (detects marker in image)
-│  CLAHE preprocess              │
-│  ArUco detection (4×4_50)      │
-│  Pose estimation (solvePnP)    │
-│  Kalman filter [x, y, vx, vy]  │
-│  Coasting (up to 15 frames)    │
-└────────────────┬───────────────┘
-                 │ /aruco_pose (PoseStamped)
-                 │ position: (x, y, z)
-                 │ orientation: (vx, vy, coast_flag, 1.0)
-                 ▼
-┌────────────────────────────────────────────────────────────────┐
-│                     offboard_landing.py                         │
-│                                                                  │
-│  State machine: INIT→TAKEOFF→ALIGN→DESCEND→BLIND_LAND→DONE     │
-│  PID control with altitude-adaptive gains                        │
-│  Lead prediction: target_pos = marker + vel × LEAD_TIME         │
-│  Camera → NED frame transform                                    │
-│  Alignment window (70% of 20-frame sliding buffer)              │
-│  Adaptive descent: FAST(0.4) / MED(0.25) / SLOW(0.1) / PAUSE  │
-│  Triple landing confirmation: alt<0.8m + err<0.4m + stable×10  │
-└────────────┬─────────────────────────────────────────────────┘
-             │
-             ├─► /fmu/in/offboard_control_mode   (20Hz heartbeat)
-             ├─► /fmu/in/trajectory_setpoint     (velocity NED)
-             └─► /fmu/in/vehicle_command          (arm / disarm)
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │   PX4 SITL Autopilot  │
-                    │  Position + Velocity  │
-                    │  Controller → Motors  │
-                    └───────────┬───────────┘
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │  Iris Quadrotor Drone │
-                    │  Translates, descends │
-                    │  Lands on vehicle ✓   │
-                    └───────────────────────┘
-```
+<img width="1360" height="1940" alt="image" src="https://github.com/user-attachments/assets/bba24f1a-bd72-4591-a7f1-82d5b13922a5" />
 
 ---
 
-## 📁 Repository Structure
-
-```
-autonomous-drone-landing/
-│
-├── README.md                          ← You are here
-├── LICENSE
-│
-├── src/                               ← Python ROS2 nodes
-│   ├── aruco_node.py                  ← ArUco detection + Kalman tracker
-│   └── offboard_landing.py            ← Offboard controller + state machine
-│
-├── plugins/                           ← Gazebo C++ plugins
-│   └── circular_motion_plugin.cpp     ← Vehicle circular motion
-│
-├── config/                            ← Configuration files
-│   ├── camera_params.yaml             ← Camera intrinsics (FOV, resolution)
-│   └── controller_params.yaml         ← PID gains, thresholds
-│
-├── launch/                            ← ROS2 launch files
-│   ├── aruco_detection.launch.py
-│   └── full_system.launch.py
-│
-├── worlds/                            ← Gazebo world files
-│   └── moving_vehicle_world.world
-│
-├── models/                            ← Gazebo model assets
-│   └── aruco_marker/
-│       ├── model.config
-│       └── textures/
-│           └── aruco_id0.png          ← ArUco marker texture for vehicle roof
-│
-├── docs/                              ← Documentation assets
-│   ├── images/
-│   │   ├── banner.gif                 ← Top banner animation
-│   │   ├── demo_screenshot.png
-│   │   ├── state_machine.png
-│   │   ├── kalman_tracking.png
-│   │   └── pid_diagram.png
-│   └── architecture.md               ← Detailed architecture notes
-│
-└── requirements.txt                   ← Python dependencies
-```
-
----
-
-## 📦 Module Breakdown
-
-### 1. `aruco_node.py` — Vision + Tracking
-
-This node is the **eyes** of the system. It processes raw camera images and produces a smooth, reliable estimate of where the ArUco marker is, how fast it's moving, and whether detection is still valid.
-
-#### What it does, step by step:
-
-**Step 1 — Receive image**
-Subscribes to `/drone/downward_camera/image_raw`. Each frame triggers `image_callback()`.
-
-**Step 2 — CLAHE preprocessing**
-Before detection, the grayscale image is enhanced using **CLAHE** (Contrast Limited Adaptive Histogram Equalization). This dramatically improves detection in uneven lighting — shadows from the drone's frame or sunlight variation can wash out the marker otherwise.
-
-```python
-self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-processed = self.clahe.apply(gray)
-```
-
-**Step 3 — ArUco detection**
-OpenCV's `aruco.detectMarkers()` finds the four corners of the marker in pixel space. Custom `DetectorParameters` are tuned for robustness — smaller `minMarkerPerimeterRate` catches the marker at altitude, looser `errorCorrectionRate` handles partial occlusion.
-
-**Step 4 — Pose estimation**
-`aruco.estimatePoseSingleMarkers()` uses the known physical size of the marker (1.0m) and the camera's intrinsic matrix `K` to compute the 3D translation vector `tvec = [rx, ry, rz]`:
-- `rx`: lateral offset (right = positive)
-- `ry`: forward offset (down in image = positive)
-- `rz`: depth — the distance from camera to marker plane, used as **altitude proxy**
-
-Camera intrinsics are computed from the Gazebo SDF field of view:
-```python
-_fx = (IMAGE_W / 2.0) / math.tan(FOV_RAD / 2.0)
-```
-
-**Step 5 — Kalman filter**
-A 4-state Kalman filter `[x, y, vx, vy]` runs every frame:
-- **Predict**: advances the state estimate using constant-velocity model
-- **Update**: fuses the new measurement when detection succeeds
-- **Coast**: if detection fails, only the predict step runs — giving up to 15 frames of graceful prediction before the tracker resets
-
-```python
-# Q tuned for a moving vehicle — high velocity noise for quick adaptation
-self.Q = np.diag([0.05, 0.05, 1.0, 1.0])
-```
-
-**Step 6 — Publish `/aruco_pose`**
-The node packs position, velocity, and a coasting flag into a `PoseStamped` message using a custom encoding contract:
-```
-position.x/y = smoothed marker offset (camera frame, metres)
-position.z   = depth / altitude above marker
-orientation.x/y = Kalman vx, vy (m/s)
-orientation.z = 0.0 (live) or 1.0 (coasting)
-orientation.w = 1.0 (sentinel)
-```
-
-**Step 7 — Overlay + landing confirmation**
-The camera window displays real-time vehicle speed (derived from Kalman velocity, shown in km/h) and a green "LANDED ON MARKER" banner when `rz < 0.8m` and horizontal error `< 0.4m`.
-
----
-
-### 2. `offboard_landing.py` — Control + State Machine
-
-This node is the **brain** of the system. It reads the ArUco pose and produces velocity commands that guide the drone through every phase of the autonomous landing.
 
 #### State Machine
 
@@ -267,55 +98,6 @@ If the marker is lost for >2 seconds above 4m, the controller aborts back to ALI
 3. Both conditions stable for 10 consecutive frames (~0.5 seconds)
 
 On confirmation, `VehicleCommand(400, 0.0)` (disarm) is sent.
-
-#### PID + Lead Prediction Control
-
-The core velocity command is computed as:
-
-```
-target = marker_position + marker_velocity × LEAD_TIME + direction × STATIC_BIAS
-
-error_NED = cam_to_NED(target)
-
-vN = KFF×vel_N + KP×error_N + KI×integral_N
-vE = KFF×vel_E + KP×error_E + KI×integral_E
-
-vN_out = smooth(vN) − KD×Δsmooth/dt     # D-term on smoothed signal
-```
-
-**Lead prediction** is the key innovation: instead of chasing where the vehicle *is*, the drone aims at where the vehicle *will be* `LEAD_TIME` seconds from now. This eliminates the lag inherent in a reactive PID controller when tracking a moving target.
-
-**Altitude-adaptive gains**: as the drone descends from 8m to 2m, `KP` increases from 0.25 to 0.40 and `KI` increases from 0.02 to 0.05, making the controller tighter near the ground where precision matters most.
-
-#### Camera → NED Frame Transform
-
-The downward camera uses a coordinate frame where:
-- `x` points right in the image → maps to NED East
-- `y` points down in the image → maps to NED North (with sign flip)
-
-```python
-NORTH_AXIS = 'y'
-NORTH_SIGN = -1    # camera y (down) → NED North (forward = positive)
-EAST_AXIS  = 'x'
-EAST_SIGN  = +1
-```
-
-This mapping is configurable as ROS2 parameters to handle different camera mounting orientations.
-
----
-
-### 3. `circular_motion_plugin.cpp` — Vehicle Simulation
-
-A Gazebo ModelPlugin that drives the red hatchback vehicle in a circular path. The physics are grounded correctly — rather than setting absolute world positions, the plugin:
-1. Computes linear speed `v = r × ω = 2.5 × 0.5 = 1.25 m/s`
-2. Expresses it as a forward velocity in the **vehicle's local frame**
-3. Rotates it into the world frame using the vehicle's current orientation quaternion
-4. Preserves the Z-axis velocity (gravity/suspension) to avoid hovering
-5. Sets angular velocity `ω = 0.5 rad/s` for turning
-
-This produces a stable, physically realistic circular trajectory that the tracking and control systems can test against.
-
----
 
 ## ⚙️ Setup and Installation
 
@@ -434,21 +216,6 @@ Rather than descending at a fixed rate, the controller adjusts descent speed bas
 
 ---
 
-## 📸 Images to Add to Your Repository
-
-For a professional-looking repo, include these images in `docs/images/`:
-
-| Image | Description | How to capture |
-|---|---|---|
-| `banner.gif` | Animated GIF of the full landing sequence | Screen record Gazebo, convert with `ffmpeg` |
-| `demo_screenshot.png` | Gazebo + camera window side-by-side | Screenshot during landing |
-| `aruco_detection.png` | Camera window showing marker detected with axes | Screenshot from `aruco_node.py` OpenCV window |
-| `state_machine.png` | State machine diagram | Export from draw.io or Mermaid |
-| `landing_confirmation.png` | Camera window showing green "LANDED ON MARKER" banner | Screenshot at touchdown |
-| `vehicle_overhead.png` | Bird's eye view of drone above vehicle | Gazebo camera view |
-
----
-
 ## 🎬 How to Add Your Demo Video
 
 GitHub does not host video files. The recommended approach:
@@ -461,44 +228,6 @@ GitHub does not host video files. The recommended approach:
 [![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
 ```
 The thumbnail becomes a clickable image that opens YouTube.
-
-### Option B — GitHub Release Assets
-1. Go to your repo → **Releases** → **Create a new release**
-2. Drag your `.mp4` file into the release assets
-3. Copy the direct link to the file and embed it in your README
-
-### Option C — GitHub Issues trick
-1. Open a new Issue in your own repo
-2. Drag and drop the `.mp4` onto the comment box — GitHub auto-uploads it and gives you a URL
-3. Copy the URL, close the Issue (don't submit), and paste the link in your README
-
-### Recording Tips
-- Record at 1080p, 30fps
-- Capture both the Gazebo 3D view and the ArUco camera window side-by-side
-- Let the full sequence run: takeoff → align → descend → blind land → "LANDED ON MARKER" confirmation
-- Keep it under 3 minutes for maximum viewer retention
-
----
-
-## 🔮 Future Improvements
-
-### Perception
-- [ ] **GPS-denied marker re-acquisition**: use IMU dead-reckoning to navigate back toward the last known marker position after a long detection gap
-- [ ] **Multi-marker support**: use multiple ArUco markers on the vehicle for redundancy at steep angles
-- [ ] **Deep learning detector**: replace ArUco with a YOLOv8 model fine-tuned on the vehicle, removing dependency on a physical marker
-- [ ] **Depth camera**: replace monocular altitude estimation with a depth sensor for metric ground-truth altitude
-
-### Control
-- [ ] **MPC (Model Predictive Control)**: replace the PID with an MPC that optimizes over a prediction horizon, naturally handling constraints and lead time
-- [ ] **Velocity feedforward tuning**: re-enable `KFF` once the Kalman velocity is computed in the world frame rather than the camera frame (currently disabled to prevent oscillation)
-- [ ] **Adaptive LEAD_TIME**: scale lead time dynamically based on vehicle speed estimate from the Kalman filter
-- [ ] **Wind disturbance rejection**: add disturbance estimation and feedforward compensation
-
-### System
-- [ ] **Real hardware deployment**: migrate from SITL to real PX4 hardware with a Raspberry Pi companion computer
-- [ ] **ROS2 lifecycle nodes**: use managed nodes for cleaner startup/shutdown sequencing
-- [ ] **Parameter hot-reloading**: expose PID gains and thresholds as dynamic reconfigure parameters
-- [ ] **Simulation-to-real gap**: test with a physical wheeled robot carrying the marker before full drone deployment
 
 ---
 
@@ -542,10 +271,9 @@ MIT is the right choice here because:
 
 ## 👨‍💻 Author
 
-**[Your Name]**
-> B.Tech / M.Tech in [Your Field] · [Your College]
-> 
-> [LinkedIn](https://linkedin.com/in/yourprofile) · [GitHub](https://github.com/yourusername) · [Email](mailto:you@email.com)
+**RAGHAV ARORA**
+> B.Tech  in AI-ML
+> [LinkedIn](https://linkedin.com/in/raghav-arora18) · [Email](mailto:arora.arraghav@email.com)
 
 ---
 
